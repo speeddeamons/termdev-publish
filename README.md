@@ -27,7 +27,7 @@ counts on the right of the tab strip add all of that up.
 | --- | --- |
 | **Windows 10 or 11, x64** | No Linux, no macOS, and none planned — the daemon-survives-the-terminal trick is built on Windows job objects and WMI |
 | **Windows Terminal** | The supported host. Anything else runs degraded rather than being turned away |
-| **[Node 24.2 or newer](https://nodejs.org)** | termdev runs its TypeScript through Node directly. `node --version` to check |
+| **[Node 24.2 or newer](https://nodejs.org)** | The runtime termdev runs on. None ships in the zip, so it is the `node` already on your PATH; below 24.2 an older libuv silently breaks win32 input mode, mouse, focus and paste, and the installer refuses rather than let you find that out later. `node --version` to check |
 | **PowerShell 7** (`pwsh`) | The pane shell, and what the installer runs under. `winget install Microsoft.PowerShell` if you only have 5.1 |
 | **Claude Code** | Optional. Everything but the agent half works without it |
 
@@ -57,6 +57,17 @@ Get-Content .\termdev-0.0.1-win-x64.zip.sha256
 
 That catches a corrupted download. It is not a signature — the checksum is served from the same
 place as the zip, so it proves nothing about who made it. Nothing here is code-signed.
+
+### What is in the zip
+
+`install.ps1`, `uninstall.ps1`, a `build-info.json` naming the version, the commit and the Node it
+was built with, and `app\` — the program. About 5 MB to download and 14 MB installed, nearly all of
+which is the two native modules that make a real console pane work and the terminal emulator that
+reads it back.
+
+The program itself is **one bundled JavaScript file**, `app\bin\termdev.js`. A release carries no
+`src\`, no `.ts` and no source map, and nothing on your machine compiles anything: what is
+published is the program, not the sources it was built from.
 
 ### What the installer touches, and nothing else
 
@@ -92,22 +103,42 @@ Close the terminal whenever you like. `termdev` brings it all back.
 
 ## Updating
 
+`ctrl+b /` → Settings → **Check for updates…**
+
+One row does the whole thing. It asks, and tells you on the status bar which of three things
+happened — a release was found, you are on the newest one, or the update server could not be
+reached. When there is something to install it says what that costs and waits for a yes, and if you
+say yes **your session comes back into the window you are looking at**: the same panes, the same
+layout, the same terminal, with the Claude conversations resumed. You never land at a shell prompt.
+
+The same thing from a shell, for a script or a machine you are not sitting at:
+
 ```powershell
 termdev update --check     # is there a newer release?
 termdev update             # fetch it, verify it, install it
 ```
 
 The check is cached and quiet — at most one request a day, and an unreachable feed reads as
-"unknown" rather than an error. Nothing installs itself: **installing restarts the daemon, and that
-ends every process running in a pane**, so `termdev update` applies immediately only when nothing is
-running, and otherwise names what would stop and waits for `--yes`.
+"unknown" rather than an error. When there is something newer, the status bar says so at its
+right-hand end and teaches the way to the row; the moment a pane is blocked or finished that space
+is the alert's again and the notice goes, because a release that can wait must never cost a pane
+that cannot.
+
+**Nothing installs itself, and nothing installs without you saying so.** Installing restarts the
+daemon, and that ends every process running in a pane — so the row shows what would stop and waits,
+and `termdev update` applies immediately only when nothing is running and otherwise waits for
+`--yes`.
 
 Your workspaces, layouts and Claude conversations live in `~\.termdev` and survive it; the
-conversations resume. If an update goes wrong, the version you were on comes back, and
-`~\.termdev\update\apply.log` says what happened.
+conversations resume. If an update goes wrong, the version you were on comes back — and either way
+termdev tells you where you ended up, once, on the status bar the next time it starts:
+`updated to 0.0.2`, or `the update to 0.0.2 failed · you are still on 0.0.1`.
 
-To make termdev never contact the network, put `"update": { "check": "never" }` in
-`~\.termdev\config.json`, or set `TERMDEV_NO_UPDATE_CHECK=1`.
+`ctrl+b /` → Settings → **Auto update check** is a different row and a different question: whether
+termdev asks *by itself* — *Once a day* or *Never*. `Never` stops the request termdev makes on its
+own and nothing else; the row below it still works every time you press it. In the file it is
+`"update": { "check": "never" }` in `~\.termdev\config.json`, and `TERMDEV_NO_UPDATE_CHECK=1` beats
+both.
 
 ## Uninstall
 
@@ -145,9 +176,9 @@ termdev is **proprietary software, not open source.** Copyright © 2026 Andrei A
 matches the one published beside it — on machines you own or control, for your own purposes,
 including at work. That needs no permission from anyone.
 
-Everything else needs prior written consent: redistributing it, modifying it, building on it, or
-running it as part of a service you provide to others. The release contains the source, because
-termdev has no compile step; you may read it, and reading it grants no right to reuse it.
+Everything else needs prior written consent: redistributing it, modifying it, building on it,
+running it as part of a service you provide to others, or reverse engineering it. The release
+contains the program, not its source.
 
 The full terms are in `LICENSE` inside the release. To request consent for anything beyond running
 it, write to [aradandrei95@gmail.com](mailto:aradandrei95@gmail.com) saying who you are and what you
@@ -163,5 +194,5 @@ licence.
 ## About this repository
 
 This repository exists to publish releases. It holds no source and takes no pull requests — the
-source is in a private repository, and it ships inside every release. Bug reports and questions are
-welcome in [Issues](../../issues), or by email.
+source is in a private repository and is published nowhere, the releases here included. Bug reports
+and questions are welcome in [Issues](../../issues), or by email.
