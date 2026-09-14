@@ -36,9 +36,9 @@ counts on the right of the tab strip add all of that up.
 Download the `.zip` from [the latest release](../../releases/latest), then:
 
 ```powershell
-Expand-Archive termdev-0.0.4-win-x64.zip -DestinationPath termdev-0.0.4-win-x64
-Get-ChildItem termdev-0.0.4-win-x64 -Recurse | Unblock-File
-pwsh -ExecutionPolicy Bypass -File .\termdev-0.0.4-win-x64\termdev\install.ps1
+Expand-Archive termdev-0.0.5-win-x64.zip -DestinationPath termdev-0.0.5-win-x64
+Get-ChildItem termdev-0.0.5-win-x64 -Recurse | Unblock-File
+pwsh -ExecutionPolicy Bypass -File .\termdev-0.0.5-win-x64\termdev\install.ps1
 
 termdev                                    # in a new terminal
 ```
@@ -61,8 +61,8 @@ way.
 **Check the download first if you like.** Every release publishes a `.sha256` beside the zip:
 
 ```powershell
-(Get-FileHash .\termdev-0.0.4-win-x64.zip -Algorithm SHA256).Hash.ToLower()
-Get-Content .\termdev-0.0.4-win-x64.zip.sha256
+(Get-FileHash .\termdev-0.0.5-win-x64.zip -Algorithm SHA256).Hash.ToLower()
+Get-Content .\termdev-0.0.5-win-x64.zip.sha256
 ```
 
 That catches a corrupted download. It is not a signature — the checksum is served from the same
@@ -110,6 +110,10 @@ alone, `-InstallClaudeHook` to set up the Claude integration in the same step.
 | `ctrl+b q` | detach — everything keeps running |
 
 Close the terminal whenever you like. `termdev` brings it all back.
+
+When you are done with a session rather than with the window, the `×` at the right of the tab strip
+quits it: every workspace closes and everything running in them ends. It asks first, counting what
+stops.
 
 ## Updating
 
